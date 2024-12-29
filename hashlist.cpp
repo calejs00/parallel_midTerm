@@ -5,7 +5,7 @@
 const std::string SALT = "$1$abcdefgh";
 
 int main() {
-    std::ifstream inputFile("rockyou.txt");
+    std::ifstream inputFile("small_rockyou.txt");
     std::ofstream outputFile("hashed_passwords.txt");
 
     if (!inputFile || !outputFile) {
