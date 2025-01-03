@@ -113,3 +113,6 @@ int main() {
     return 0;
 }
 
+
+//Para compilar g++ -fopenmp -O3 -march=native -o optimized2_password_cracker parallel2.cpp -lcrypt
+

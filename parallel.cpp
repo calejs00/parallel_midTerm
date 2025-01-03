@@ -3,24 +3,32 @@
 #include <string>
 #include <chrono>   // Para medir el tiempo
 #include <omp.h>    // Para OpenMP
+#include <unordered_map>
+#include <vector>
 
-#define CHUNK_SIZE 100
+#define CHUNK_SIZE 1000 // Aumentar tamaño de bloque para balancear la carga
 
 const std::string CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
 
 // Función para generar contraseñas y compararlas con el hash objetivo
 bool generatePasswords(const std::string& prefix, size_t length, const std::string& targetHash, bool& found) {
+    static std::unordered_map<char, size_t> charMap([]() {
+        std::unordered_map<char, size_t> map;
+        for (size_t i = 0; i < CHARSET.size(); ++i) {
+            map[CHARSET[i]] = i;
+        }
+        return map;
+    }());
+
     std::string password = prefix;
     password.resize(length, CHARSET[0]); // Completar con el primer carácter
+    bool localFound = false;
 
-    while (!found) {
+    while (!localFound && !found) {
         char* hash = crypt(password.c_str(), "$1$abcdefgh");
-        #pragma omp critical
-        {
-            std::cout << "Probing password: " << password << " -> Hash: " << hash << std::endl;
-        }
 
         if (std::string(hash) == targetHash) {
+            localFound = true;
             #pragma omp critical
             {
                 if (!found) {
@@ -29,7 +37,6 @@ bool generatePasswords(const std::string& prefix, size_t length, const std::stri
                 }
             }
             #pragma omp flush(found)
-            return true;
         }
 
         // Incrementar la contraseña al siguiente valor
@@ -37,7 +44,7 @@ bool generatePasswords(const std::string& prefix, size_t length, const std::stri
             if (password[i] == CHARSET.back()) {
                 password[i] = CHARSET[0];
             } else {
-                password[i] = CHARSET[CHARSET.find(password[i]) + 1];
+                password[i] = CHARSET[charMap[password[i]] + 1];
                 break;
             }
         }
@@ -47,7 +54,7 @@ bool generatePasswords(const std::string& prefix, size_t length, const std::stri
         }
     }
 
-    return false;
+    return localFound;
 }
 
 int main() {
@@ -67,6 +74,15 @@ int main() {
 
     bool found = false;
     size_t passwordLength = inputPassword.size();
+
+    // Prefijos probables
+    std::vector<std::string> prefixes = {"123", "abc", "xyz", "password", "admin"};
+
+    // Priorizar prefijos comunes
+    for (const auto& prefix : prefixes) {
+        if (found) break;
+        generatePasswords(prefix, passwordLength, targetHash, found);
+    }
 
     // Paralelización: dividir el espacio de búsqueda inicial
     #pragma omp parallel for schedule(dynamic, CHUNK_SIZE) shared(found)
@@ -88,3 +104,4 @@ int main() {
 
     return 0;
 }
+
