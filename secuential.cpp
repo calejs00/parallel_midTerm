@@ -3,7 +3,7 @@
 #include <string>
 #include <chrono> // Para medir el tiempo
 
-const std::string CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
+const std::string CHARSET = "abcdefghijklmnopqrstuvwxyz0123456789./";
 
 // Función para generar y probar contraseñas
 bool generatePasswords(std::string& password, int pos, const std::string& targetHash) {
@@ -29,12 +29,17 @@ bool generatePasswords(std::string& password, int pos, const std::string& target
 
 int main() {
     std::string inputPassword;
-    std::cout << "Introduce la contraseña a encriptar (máximo 8 caracteres): ";
+    std::cout << "Introduce la contraseña a encriptar (8 caracteres): ";
     std::cin >> inputPassword;
 
     // Generar el hash de la contraseña introducida
     if (inputPassword.size() > 8) {
         std::cerr << "Error: La contraseña no puede tener más de 8 caracteres." << std::endl;
+        return 1;
+    }
+
+    if (inputPassword.size() < 8) {
+        std::cerr << "Error: La contraseña no puede tener menos de 8 caracteres." << std::endl;
         return 1;
     }
 
