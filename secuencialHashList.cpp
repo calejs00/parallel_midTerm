@@ -7,15 +7,16 @@
 #include <algorithm> // Para std::next_permutation
 
 const std::string CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
-const size_t MAX_PASSWORD_LENGTH = 8; // Longitud máxima de las contraseñas
-const size_t MAX_SALT_LENGTH = 2;     // Supongamos un SALT máximo de 4 caracteres
+const size_t MAX_PASSWORD_LENGTH = 5; // Longitud máxima de las contraseñas
+const std::string KNOW_SALT = "1g";     // Supongamos un SALT máximo de 4 caracteres
 
 // Función para generar contraseñas recursivamente
-bool generatePasswords(std::string& password, int pos, const std::string& targetHash, const std::string& salt) {
+bool generatePasswords(std::string& password, int pos, const std::string& targetHash) {
     if (pos == password.size()) {
-        char* generatedHash = crypt(password.c_str(), salt.c_str());
+        //std::cout << "Probando contraseña: "<< password << std::endl;
+        char* generatedHash = crypt(password.c_str(), KNOW_SALT.c_str());
         if (targetHash == generatedHash) {
-            std::cout << "Contraseña encontrada: " << password << " con SALT: " << salt << std::endl;
+            std::cout << "Contraseña encontrada: " << password << " con SALT: " << KNOW_SALT << std::endl;
             return true;
         }
         return false;
@@ -23,7 +24,7 @@ bool generatePasswords(std::string& password, int pos, const std::string& target
 
     for (char c : CHARSET) {
         password[pos] = c;
-        if (generatePasswords(password, pos + 1, targetHash, salt)) {
+        if (generatePasswords(password, pos + 1, targetHash)) {
             return true;
         }
     }
@@ -31,22 +32,15 @@ bool generatePasswords(std::string& password, int pos, const std::string& target
     return false;
 }
 
-// Función para probar todas las combinaciones de SALT de longitud variable
+// Función para probar las contraseñas con el SALT conocido
 bool crackHash(const std::string& targetHash, std::chrono::duration<double>& duration) {
     auto start_time = std::chrono::high_resolution_clock::now();
 
-    for (size_t saltLength = 1; saltLength <= MAX_SALT_LENGTH; ++saltLength) {
-        std::string salt(saltLength, CHARSET[0]); // SALT inicial de longitud 'saltLength'
-
-        // Probar todas las combinaciones del SALT de longitud actual
-        do {
-            std::string password(MAX_PASSWORD_LENGTH, CHARSET[0]); // Contraseña inicial
-            if (generatePasswords(password, 0, targetHash, salt)) {
-                auto end_time = std::chrono::high_resolution_clock::now();
-                duration = end_time - start_time;
-                return true;
-            }
-        } while (std::next_permutation(salt.begin(), salt.end()));
+    std::string password(MAX_PASSWORD_LENGTH, CHARSET[0]); // Contraseña inicial
+    if (generatePasswords(password, 0, targetHash)) {
+        auto end_time = std::chrono::high_resolution_clock::now();
+        duration = end_time - start_time;
+        return true;
     }
 
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -55,7 +49,7 @@ bool crackHash(const std::string& targetHash, std::chrono::duration<double>& dur
 }
 
 int main() {
-    std::ifstream inputFile("small_hashed_passwords.txt");
+    std::ifstream inputFile("small_hashed_passwords2.txt");
     std::ofstream logFile("performance_log.txt");
 
     if (!inputFile || !logFile) {
@@ -79,10 +73,12 @@ int main() {
         std::chrono::duration<double> duration;
         if (crackHash(targetHash, duration)) {
             logFile << "Hash: " << targetHash 
-                    << " -> Descifrado en " << duration.count() << " segundos.\n";
+                    << " -> Descifrado en " << duration.count() 
+                    << " segundos.\n";
         } else {
             logFile << "Hash: " << targetHash 
-                    << " -> No descifrado (Tiempo total: " << duration.count() << " segundos).\n";
+                    << " -> No descifrado (Tiempo total: " << duration.count() 
+                    << " segundos.\n";
         }
     }
 

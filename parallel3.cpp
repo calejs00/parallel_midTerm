@@ -1,4 +1,4 @@
-#include <iostream>
+đ#include <iostream>
 #include <unistd.h> // Para crypt
 #include <string>
 #include <chrono>   // Para medir el tiempo
