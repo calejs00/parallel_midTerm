@@ -9,6 +9,7 @@ def sumar_segundos(archivo):
             # Buscar la posición del número de segundos
             if "segundos." in palabras:
                 indice_segundos = palabras.index("segundos.") - 1
+                print(palabras[indice_segundos])
                 total_segundos += float(palabras[indice_segundos])  # Sumar el número convertido a float
 
     # Convertir el total de segundos a horas, minutos y segundos
@@ -18,10 +19,10 @@ def sumar_segundos(archivo):
     segundos = total_segundos % 60
 
     print(f"Tiempo total: {horas} horas, {minutos} minutos, {segundos:.2f} segundos")
-    print(f"La media de segundos por contraseña es: {media}")
+    print(f"La media de segundos por contrasenna es: {media}")
     return total_segundos
 
 
 # Llama a la función con el archivo deseado
-archivo = "C:/Users/clara/Documents/3ºUNI/Parallel/parallel_midTerm/midTerm/performanceParallel8hilos_log.txt"  # Cambia esto por el nombre de tu archivo
+archivo = "C:/Users/clara/Documents/3ºUNI/Parallel/parallel_midTerm/midTerm/performanceParallel16hilos_log.txt"  # Cambia esto por el nombre de tu archivo
 sumar_segundos(archivo)
