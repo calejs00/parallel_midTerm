@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
-#include <opencv2/features2d.hpp>
-#include <opencv2/xfeatures2d.hpp>
+#include <opencv2/features2d.hpp>  // Usamos esta librería que está incluida en OpenCV estándar
 #include <vector>
 #include <iostream>
 
@@ -18,11 +17,11 @@ vector<Mat> loadImages(const string& folderPath) {
 }
 
 void detectAndMatchFeatures(const Mat& img1, const Mat& img2, vector<KeyPoint>& keypoints1, vector<KeyPoint>& keypoints2, Mat& descriptors1, Mat& descriptors2, vector<DMatch>& matches) {
-    Ptr<ORB> detector = ORB::create();
+    Ptr<ORB> detector = ORB::create();  // Usamos ORB en lugar de características de contrib
     detector->detectAndCompute(img1, noArray(), keypoints1, descriptors1);
     detector->detectAndCompute(img2, noArray(), keypoints2, descriptors2);
     
-    BFMatcher matcher(NORM_HAMMING, true);
+    BFMatcher matcher(NORM_HAMMING, true);  // Usamos BFMatcher con NORM_HAMMING para ORB
     matcher.match(descriptors1, descriptors2, matches);
 }
 
@@ -71,8 +70,8 @@ vector<Mat> createAllPanoramas(const vector<vector<Mat>>& imageGroups) {
 }
 
 int main() {
-    // Cargar las imágenes desde una carpeta (por ejemplo, "dataset/")
-    vector<Mat> images = loadImages("C:/home/clara/Documentos/parallel_midTerm/finalTerm");
+    // Cargar las imágenes desde una carpeta (por ejemplo, "dataset/"), reemplaza esta ruta con tu propia ruta
+    vector<Mat> images = loadImages("C:/ruta/a/tu/carpeta/de/imagenes");
 
     // Organizar las imágenes en grupos para las panorámicas
     vector<vector<Mat>> imageGroups = {
