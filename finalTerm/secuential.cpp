@@ -4,6 +4,7 @@
 #include <cmath>
 #include <ctime>
 #include <chrono>  // Para medir el tiempo
+#include <omp.h>   // Para usar OpenMP
 
 using namespace std;
 using namespace std::chrono;
@@ -124,7 +125,15 @@ int main() {
     srand(time(0));
 
     int k = 3;  // Número de clusters
-    vector<Point> data = {{1.0, 2.0}, {1.5, 1.8}, {5.0, 8.0}, {8.0, 8.0}, {1.0, 0.6}, {9.0, 11.0}};
+    int n = 100000; // Número de puntos en el conjunto de datos
+
+    // Generar puntos aleatorios
+    vector<Point> data(n);
+    for (int i = 0; i < n; ++i) {
+        data[i].x = (rand() % 1000) / 1000.0;
+        data[i].y = (rand() % 1000) / 1000.0;
+    }
+
     vector<Point> centroids(k);
 
     // Inicializar los centros aleatoriamente
@@ -132,19 +141,21 @@ int main() {
         centroids[i] = data[rand() % data.size()];
     }
 
-    // Medir el tiempo de ejecución de la versión secuencial
-    auto start = high_resolution_clock::now();
-    kmeans(data, centroids, k);
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(stop - start);
-    cout << "Tiempo de ejecución secuencial: " << duration.count() << " ms" << endl;
+    // Ejecutar pruebas con diferentes números de hilos
+    for (int threads = 1; threads <= 8; threads *= 2) {
+        omp_set_num_threads(threads); // Establecer el número de hilos
 
-    // Medir el tiempo de ejecución de la versión paralela
-    start = high_resolution_clock::now();
-    kmeans_parallel(data, centroids, k);
-    stop = high_resolution_clock::now();
-    duration = duration_cast<milliseconds>(stop - start);
-    cout << "Tiempo de ejecución paralelo: " << duration.count() << " ms" << endl;
+        // Medir el tiempo de ejecución de la versión secuencial
+        auto start = high_resolution_clock::now();
+        if (threads == 1) { // Solo ejecuta la versión secuencial cuando threads == 1
+            kmeans(data, centroids, k);
+        } else {
+            kmeans_parallel(data, centroids, k);
+        }
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(stop - start);
+        cout << "Tiempo de ejecución con " << threads << " hilos: " << duration.count() << " ms" << endl;
+    }
 
     return 0;
 }
