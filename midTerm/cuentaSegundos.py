@@ -12,6 +12,7 @@ def sumar_segundos(archivo):
                 print(palabras[indice_segundos])
                 total_segundos += float(palabras[indice_segundos])  # Sumar el número convertido a float
 
+    total_segundos =
     # Convertir el total de segundos a horas, minutos y segundos
     media = int(total_segundos // 100)
     horas = int(total_segundos // 3600)
