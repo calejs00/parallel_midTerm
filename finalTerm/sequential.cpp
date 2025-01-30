@@ -72,7 +72,7 @@ vector<Mat> createAllPanoramas(const vector<vector<Mat>>& imageGroups) {
 
 int main() {
     // Cargar las imágenes desde una carpeta (por ejemplo, "dataset/")
-    vector<Mat> images = loadImages("C:\Users\clara\Documents\3ºUNI\Parallel\parallel_midTerm\finalTerm\SPHP_dataset");
+    vector<Mat> images = loadImages("C:/home/clara/Documentos/parallel_midTerm/finalTerm");
 
     // Organizar las imágenes en grupos para las panorámicas
     vector<vector<Mat>> imageGroups = {
