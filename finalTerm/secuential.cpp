@@ -4,6 +4,7 @@
 #include <cmath>
 #include <ctime>
 #include <chrono>  // Para medir el tiempo
+#include <fstream>
 #include <omp.h>   // Para usar OpenMP
 
 using namespace std;
@@ -123,39 +124,41 @@ void kmeans_parallel(const vector<Point>& data, vector<Point>& centroids, int k,
 
 int main() {
     srand(time(0));
-
-    int k = 3;  // Número de clusters
+    ofstream file("resultsKmeans.txt");
     int n = 100000; // Número de puntos en el conjunto de datos
 
-    // Generar puntos aleatorios
     vector<Point> data(n);
     for (int i = 0; i < n; ++i) {
         data[i].x = (rand() % 1000) / 1000.0;
         data[i].y = (rand() % 1000) / 1000.0;
     }
 
-    vector<Point> centroids(k);
-
-    // Inicializar los centros aleatoriamente
-    for (int i = 0; i < k; ++i) {
-        centroids[i] = data[rand() % data.size()];
-    }
-
-    // Ejecutar pruebas con diferentes números de hilos
-    for (int threads = 1; threads <= 8; threads *= 2) {
-        omp_set_num_threads(threads); // Establecer el número de hilos
-
-        // Medir el tiempo de ejecución de la versión secuencial
-        auto start = high_resolution_clock::now();
-        if (threads == 1) { // Solo ejecuta la versión secuencial cuando threads == 1
-            kmeans(data, centroids, k);
-        } else {
-            kmeans_parallel(data, centroids, k);
+    vector<int> k_values = {3, 5, 10, 20, 50, 100};  // Número de clusters
+    for (int k : k_values) {
+        file << "Running with k = " << k << "\n";
+        cout << "Running with k = " << k << endl;
+        vector<Point> centroids(k);
+        for (int i = 0; i < k; ++i) {
+            centroids[i] = data[rand() % data.size()];
         }
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
-        cout << "Tiempo de ejecución con " << threads << " hilos: " << duration.count() << " ms" << endl;
-    }
 
+        for (int threads = 1; threads <= 16; threads *= 2) {
+            omp_set_num_threads(threads);
+
+            auto start = high_resolution_clock::now();
+            if (threads == 1) {
+                kmeans(data, centroids, k);
+            } else {
+                kmeans_parallel(data, centroids, k);
+            }
+            auto stop = high_resolution_clock::now();
+            auto duration = duration_cast<milliseconds>(stop - start);
+            cout << "Running time with " << threads << " threads and k = " << k << ": " << duration.count() << " ms" << endl;
+            file << "Time with" << threads << " threads: " << duration.count() << " ms\n";        
+        }
+        file << "\n";
+    }  
+    file.close();
+    cout << "Results saved in 'resultsKmeans.txt'" << endl; 
     return 0;
 }
