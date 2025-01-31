@@ -98,4 +98,4 @@ Hash: 1gdVzTJFEx76U -> Descifrado.
 Hash: 1gUB1TOXXM5yM -> Descifrado.
 Hash: 1ga9nOZx24QlU -> Descifrado.
 Hash: 1gF83zX.FtxHQ -> Descifrado.
-Tiempo total de ejecución: 4597.31 segundos.
+Tiempo total de ejecución: 4469.97 segundos.
